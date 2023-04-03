@@ -13,6 +13,7 @@ from modelscope.utils.checkpoint import (load_checkpoint, save_checkpoint,
 from modelscope.utils.constant import LogKeys, ModelFile
 from modelscope.utils.logger import get_logger
 from modelscope.utils.torch_utils import is_master
+from modelscope.hub.push_to_hub import push_to_hub
 from .builder import HOOKS
 from .hook import Hook
 from .priority import Priority
@@ -49,6 +50,10 @@ class CheckpointHook(Hook):
                  output_sub_dir=ModelFile.TRAIN_OUTPUT_DIR,
                  save_last=True,
                  max_checkpoint_num=None,
+                 push_to_hub=False,
+                 model_id_with_org=None,
+                 hub_token=None,
+                 private_hub=True,
                  **kwargs):
         self.interval = interval
         self.by_epoch = by_epoch
@@ -58,6 +63,10 @@ class CheckpointHook(Hook):
         self.save_last = save_last
         self.rng_state = None
         self.max_checkpoint_num = None
+        self.push_to_hub = push_to_hub
+        self.model_id_with_org = model_id_with_org
+        self.hub_token = hub_token
+        self.private_hub = private_hub
         if max_checkpoint_num is not None:
             self.max_checkpoint_num = max(int(max_checkpoint_num), 1)
         self.history_checkpoints = []
@@ -105,17 +114,24 @@ class CheckpointHook(Hook):
         """
 
         if self.by_epoch:
-            checkpoint_path_prefix = os.path.join(
-                self.save_dir, f'{LogKeys.EPOCH}_{trainer.epoch + 1}')
+            prefix = f'{LogKeys.EPOCH}_{trainer.epoch + 1}'
         else:
-            checkpoint_path_prefix = os.path.join(
-                self.save_dir, f'{LogKeys.ITER}_{trainer.iter + 1}')
+            prefix = f'{LogKeys.ITER}_{trainer.iter + 1}'
 
+        checkpoint_path_prefix = os.path.join(
+                self.save_dir, prefix)
         meta = self._create_training_state(trainer)
         self.save_checkpoints(trainer, checkpoint_path_prefix,
                               self.output_sub_dir, meta)
         self.history_checkpoints.append(checkpoint_path_prefix)
         self._remove_obsolete_checkpoints(trainer)
+        if self.push_to_hub:
+            push_to_hub(self.model_id_with_org,
+                        os.path.join(self.save_dir, self.output_sub_dir),
+                        token=self.hub_token,
+                        private=self.private_hub,
+                        commit_message=prefix,
+                        async_upload=True)
 
     def _remove_obsolete_checkpoints(self, trainer):
         if self.max_checkpoint_num is not None and \
@@ -426,17 +442,16 @@ class BestCkptSaverHook(CheckpointHook):
 
     def _save_checkpoint(self, trainer):
         checkpoint_path_prefix = self.save_file_name
+        if self.by_epoch:
+            prefix = f'best_{LogKeys.EPOCH}{trainer.epoch + 1}_{self.metric_key}{self._best_metric}'
+        else:
+            prefix = f'best_{LogKeys.ITER}{trainer.iter + 1}_{self.metric_key}{self._best_metric}'
+
         if checkpoint_path_prefix is None:
-            if self.by_epoch:
-                checkpoint_path_prefix = os.path.join(
-                    self.save_dir,
-                    f'best_{LogKeys.EPOCH}{trainer.epoch + 1}_{self.metric_key}{self._best_metric}'
-                )
-            else:
-                checkpoint_path_prefix = os.path.join(
-                    self.save_dir,
-                    f'best_{LogKeys.ITER}{trainer.iter + 1}_{self.metric_key}{self._best_metric}'
-                )
+            checkpoint_path_prefix = os.path.join(
+                self.save_dir,
+                prefix
+            )
         else:
             checkpoint_path_prefix = os.path.join(self.save_dir,
                                                   checkpoint_path_prefix)
@@ -447,6 +462,13 @@ class BestCkptSaverHook(CheckpointHook):
                               self.output_sub_dir, meta)
         self.history_checkpoints.add(checkpoint_path_prefix)
         self._remove_obsolete_checkpoints(trainer)
+        if self.push_to_hub:
+            push_to_hub(self.model_id_with_org,
+                        os.path.join(self.save_dir, self.output_sub_dir),
+                        token=self.hub_token,
+                        private=self.private_hub,
+                        commit_message=prefix,
+                        async_upload=True)
 
     def _remove_obsolete_checkpoints(self, trainer):
 
