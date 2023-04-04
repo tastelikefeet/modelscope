@@ -2,6 +2,7 @@ import os
 from modelscope.metainfo import Trainers
 from modelscope.trainers import build_trainer
 from modelscope.msdatasets.audio.asr_dataset import ASRDataset
+import argparse
 
 
 def modelscope_finetune(params):
@@ -24,12 +25,29 @@ def modelscope_finetune(params):
 if __name__ == '__main__':
     from funasr.utils.modelscope_param import modelscope_args
 
-    params = modelscope_args(model="damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch")
-    params.output_dir = "./checkpoint"  # 模型保存路径
-    params.data_path = "speech_asr_aishell1_trainsets"  # 数据路径，可以为modelscope中已上传数据，也可以是本地数据
-    params.dataset_type = "small"  # 小数据量设置small，若数据量大于1000小时，请使用large
-    params.batch_bins = 2000  # batch size，如果dataset_type="small"，batch_bins单位为fbank特征帧数，如果dataset_type="large"，batch_bins单位为毫秒，
-    params.max_epoch = 50  # 最大训练轮数
-    params.lr = 0.00005  # 设置学习率
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        'model', type=str, default="damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch",
+        help='Name of the model to be downloaded.')
+    parser.add_argument('output_dir', type=str, default='./checkpoint', help='The output dir for the checkpoint')
+    parser.add_argument('data_path', type=str, default='speech_asr_aishell1_trainsets',
+                        help='The data path, which can be a local path or a data id in datahub')
+    parser.add_argument('dataset_type', type=str, default='small', help='dataset size, can be `small`(<=1000 rows) '
+                                                                        'or `large`(>1000 rows)')
+    parser.add_argument('batch_bins', type=int, default=2000, help='Batch size, if dataset_type is small,'
+                                                                   'the unit of batch_bins is '
+                                                                   'the feature frame numbers of fbank, else '
+                                                                   'the unit of batch_bins is mille second')
+    parser.add_argument('max_epoch', type=int, default=50, help='The max epoch number')
+    parser.add_argument('lr', type=float, default=0.00005, help='The learning rate')
+    args, _ = parser.parse_known_args()
+
+    params = modelscope_args(model=args.model)
+    params.output_dir = args.output_dir
+    params.data_path = args.data_path
+    params.dataset_type = args.dataset_type
+    params.batch_bins = args.batch_bins
+    params.max_epoch = args.max_epoch
+    params.lr = args.lr
 
     modelscope_finetune(params)
