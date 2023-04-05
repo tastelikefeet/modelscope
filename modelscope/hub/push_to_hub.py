@@ -36,6 +36,7 @@ def _api_push_to_hub(repo_name, output_dir, token=None, private=True, commit_mes
         chinese_name=repo_name,
         commit_message=commit_message,
     )
+    commit_message = commit_message or 'No commit message'
     logger.info(f'Successfully upload the model to {repo_name} with message: {commit_message}')
 
 
