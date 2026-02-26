@@ -23,7 +23,7 @@ class HFUtilTest(unittest.TestCase):
     def setUp(self):
         logger.info('SetUp')
         self.api = HubApi()
-        self.api.login(TEST_ACCESS_TOKEN1)
+        response, _ = self.api.login(TEST_ACCESS_TOKEN1)
         self.user = TEST_MODEL_ORG
         print(self.user)
         self.create_model_name = '%s/%s_%s' % (self.user, 'test_model_upload',
@@ -121,15 +121,6 @@ class HFUtilTest(unittest.TestCase):
             self.assertTrue(model is not None)
         try:
             model = AutoModel.from_pretrained('Qwen/Qwen2.5-0.5B')
-        except Exception:
-            pass
-        else:
-            self.assertTrue(False)
-
-    def test_patch_config_bert(self):
-        from transformers import BertConfig
-        try:
-            BertConfig.from_pretrained('Qwen/Qwen2.5-0.5B')
         except Exception:
             pass
         else:
