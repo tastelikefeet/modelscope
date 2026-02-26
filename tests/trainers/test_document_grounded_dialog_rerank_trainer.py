@@ -12,6 +12,7 @@ from modelscope.trainers.nlp.document_grounded_dialog_rerank_trainer import \
     DocumentGroundedDialogRerankTrainer
 from modelscope.utils.config import Config
 from modelscope.utils.constant import DownloadMode, ModelFile, Tasks
+from modelscope.utils.import_utils import exists
 from modelscope.utils.test_utils import test_level
 
 
@@ -24,7 +25,9 @@ class TestDialogIntentTrainer(unittest.TestCase):
         shutil.rmtree('./model')
         super().tearDown()
 
-    @unittest.skipUnless(test_level() >= 0, 'skip test in current test level')
+    @unittest.skipUnless(
+        exists('transformers<5.0'),
+        'Skip test because transformers version is too high.')
     def test_trainer_with_model_and_args(self):
         args = {
             'device': 'gpu',
