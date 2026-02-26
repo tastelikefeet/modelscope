@@ -5,9 +5,6 @@ import tempfile
 import unittest
 
 import numpy as np
-import tensorflow as tf
-from tensorflow.keras.applications.resnet50 import ResNet50, preprocess_input
-from tensorflow.keras.preprocessing import image
 
 from modelscope.exporters import TfModelExporter
 from modelscope.utils.test_utils import test_level
@@ -27,6 +24,9 @@ class TestExportTfModel(unittest.TestCase):
 
     @unittest.skipUnless(test_level() >= 2, 'skip test in current test level')
     def test_export_resnet50(self):
+        import tensorflow as tf
+        from tensorflow.keras.applications.resnet50 import ResNet50, preprocess_input
+        from tensorflow.keras.preprocessing import image
         img_path = 'data/test/images/auto_demo.jpg'
         img = image.load_img(img_path, target_size=(224, 224))
         x = image.img_to_array(img)

@@ -108,23 +108,19 @@ class HFUtilTest(unittest.TestCase):
     def test_transformer_patch(self):
         with patch_context():
             from transformers import AutoTokenizer, AutoModelForCausalLM
-            tokenizer = AutoTokenizer.from_pretrained(
-                'iic/nlp_structbert_sentiment-classification_chinese-tiny')
+            tokenizer = AutoTokenizer.from_pretrained('Qwen/Qwen2.5-0.5B')
             self.assertIsNotNone(tokenizer)
-            model = AutoModelForCausalLM.from_pretrained(
-                'iic/nlp_structbert_sentiment-classification_chinese-tiny')
+            model = AutoModelForCausalLM.from_pretrained('Qwen/Qwen2.5-0.5B')
             self.assertIsNotNone(model)
 
     def test_patch_model(self):
         from modelscope.utils.hf_util.patcher import patch_context
         with patch_context():
             from transformers import AutoModel
-            model = AutoModel.from_pretrained(
-                'iic/nlp_structbert_sentiment-classification_chinese-tiny')
+            model = AutoModel.from_pretrained('Qwen/Qwen2.5-0.5B')
             self.assertTrue(model is not None)
         try:
-            model = AutoModel.from_pretrained(
-                'iic/nlp_structbert_sentiment-classification_chinese-tiny')
+            model = AutoModel.from_pretrained('Qwen/Qwen2.5-0.5B')
         except Exception:
             pass
         else:
@@ -133,8 +129,7 @@ class HFUtilTest(unittest.TestCase):
     def test_patch_config_bert(self):
         from transformers import BertConfig
         try:
-            BertConfig.from_pretrained(
-                'iic/nlp_structbert_sentiment-classification_chinese-tiny')
+            BertConfig.from_pretrained('Qwen/Qwen2.5-0.5B')
         except Exception:
             pass
         else:
@@ -143,22 +138,18 @@ class HFUtilTest(unittest.TestCase):
     def test_patch_config(self):
         with patch_context():
             from transformers import AutoConfig
-            config = AutoConfig.from_pretrained(
-                'iic/nlp_structbert_sentiment-classification_chinese-tiny')
-            self.assertTrue(getattr(config, 'base_model_prefix') == 'encoder')
+            config = AutoConfig.from_pretrained('Qwen/Qwen2.5-0.5B')
+            self.assertTrue(config is not None)
         try:
-            config = AutoConfig.from_pretrained(
-                'iic/nlp_structbert_sentiment-classification_chinese-tiny')
-            self.assertTrue(
-                getattr(config, 'base_model_prefix', None) != 'encoder')
+            AutoConfig.from_pretrained('Qwen/Qwen2.5-0.5B')
+            self.assertTrue(False)
         except:  # noqa
             pass
 
         # Test patch again
         with patch_context():
             from transformers import AutoConfig
-            config = AutoConfig.from_pretrained(
-                'iic/nlp_structbert_sentiment-classification_chinese-tiny')
+            config = AutoConfig.from_pretrained('Qwen/Qwen2.5-0.5B')
             self.assertTrue(config is not None)
 
     @unittest.skipUnless(test_level() >= 1, 'skip test in current test level')

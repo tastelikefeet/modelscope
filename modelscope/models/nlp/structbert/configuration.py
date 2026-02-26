@@ -132,4 +132,3 @@ class SbertConfig(PretrainedConfig):
         # adv_bound value, used in adv loss.
         self.adv_bound = 2 * self.sigma if 'adv_bound' not in kwargs else kwargs[
             'adv_bound']
-        self.is_decoder = False
