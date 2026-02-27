@@ -106,9 +106,8 @@ class TestTrainerWithNlp(unittest.TestCase):
 
         self.assertEqual(trainer.iter, 3)
 
-    @unittest.skipIf(
-        version.parse(torch.__version__) < version.parse('2.0.0.dev'),
-        'skip test when torch version < 2.0')
+    @unittest.skipUnless(
+        exists('torch<2.4'), 'Skip test because torch version is too high.')
     def test_trainer_compile(self):
         model_id = 'damo/nlp_structbert_sentence-similarity_chinese-tiny'
 

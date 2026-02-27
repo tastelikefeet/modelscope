@@ -1,19 +1,12 @@
 # Copyright (c) Alibaba, Inc. and its affiliates.
-import os
 import shutil
 import unittest
 
-import json
-
-from modelscope.hub.snapshot_download import snapshot_download
-from modelscope.metainfo import Trainers
 from modelscope.msdatasets import MsDataset
 from modelscope.trainers.nlp.document_grounded_dialog_rerank_trainer import \
     DocumentGroundedDialogRerankTrainer
-from modelscope.utils.config import Config
-from modelscope.utils.constant import DownloadMode, ModelFile, Tasks
+from modelscope.utils.constant import DownloadMode
 from modelscope.utils.import_utils import exists
-from modelscope.utils.test_utils import test_level
 
 
 class TestDialogIntentTrainer(unittest.TestCase):
